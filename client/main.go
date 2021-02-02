@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-
 	"github.com/micro/go-micro/v2/logger"
 
 	postProto "micro-service/proto/post"
@@ -17,13 +16,17 @@ func main() {
 	service := micro.NewService(
 		micro.Name("user.client"),
 		micro.Version("v1.0.0"),
+		//micro.Registry(etcd.NewRegistry(
+		//	// 地址是我本地etcd服务器地址，不要照抄
+		//	registry.Addrs("127.0.0.1:2379"),
+		//)),
 	)
 	// Initialise the client and parse command line flags
 	service.Init()
-
+	client := service.Client()
 	// Create new user client
-	user := userProto.NewUserService("go.micro.srv.user", service.Client())
-	post := postProto.NewPostService("go.micro.srv.user", service.Client())
+	user := userProto.NewUserService("go.micro.srv.user", client)
+	post := postProto.NewPostService("go.micro.srv.user", client)
 
 	// Call the user
 	rsp, err := user.QueryUserByName(context.TODO(), &userProto.Request{UserName: "John"})

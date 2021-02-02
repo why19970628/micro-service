@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"github.com/micro/go-micro/v2/registry"
+	"github.com/micro/go-micro/v2/registry/etcd"
 
 	"github.com/micro/go-micro/v2/logger"
 
@@ -44,7 +46,13 @@ func (s *Say) Hello(c *gin.Context) {
 
 func main() {
 	// Create a new service
-	service := micro.NewService(micro.Name("web.gin"))
+	service := micro.NewService(
+		micro.Name("web.gin"),
+		// 配置etcd为注册中心，配置etcd路径，默认端口是2379
+		micro.Registry(etcd.NewRegistry(
+			registry.Addrs("127.0.0.1:2379"),
+		)),
+	)
 	// Initialise the client and parse command line flags
 	service.Init()
 
@@ -54,7 +62,7 @@ func main() {
 	// Create RESTful handler (using Gin)
 	say := new(Say)
 	router := gin.Default()
-	router.GET("/greeter", say.Anything)
-	router.GET("/greeter/:name", say.Hello)
+	router.GET("/greeter", say.Anything)    //  curl localhost:8081/greeter/asas
+	router.GET("/greeter/:name", say.Hello) //  curl localhost:8081/greeter
 	router.Run(":8081")
 }
